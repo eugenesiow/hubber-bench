@@ -39,7 +39,8 @@ public class Publisher {
         PublisherApplication() throws InvalidDeepstreamConfig {
 
             try {
-                final DeepstreamClient client = new DeepstreamClient("localhost:6020");
+//                final DeepstreamClient client = new DeepstreamClient("localhost:6020");
+            	final DeepstreamClient client = new DeepstreamClient("192.168.0.100:6020");
                 subscribeConnectionChanges(client);
                 subscribeRuntimeErrors(client);
                 
