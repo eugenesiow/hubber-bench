@@ -5,9 +5,7 @@ import io.deepstream.ConnectionStateListener;
 import io.deepstream.DeepstreamClient;
 import io.deepstream.DeepstreamRuntimeErrorHandler;
 import io.deepstream.Event;
-import io.deepstream.EventListener;
 import io.deepstream.InvalidDeepstreamConfig;
-import io.deepstream.List;
 import io.deepstream.ListenListener;
 import io.deepstream.LoginResult;
 import io.deepstream.Record;
@@ -23,9 +21,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -58,7 +54,7 @@ public class Publisher {
                         		client.event.emit("test/test"+i, new Object[]{"An event just happened", new Date().getTime()});
                         	}
                         }
-                    }, 1, 5000, TimeUnit.MILLISECONDS);
+                    }, 1, 10000, TimeUnit.MILLISECONDS);
                     
 //                    client.event.subscribe("test/test1", new EventListener() {
 //                    	public void onEvent(String eventName, Object[] payload) {

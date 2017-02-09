@@ -12,14 +12,20 @@ public class GraphETL {
 	private static Map<Integer,Integer> index = new HashMap<Integer,Integer>(); 
 
 	public static void main(String[] args) {
+//		FormatGraph("graphs/ca-GrQc.txt","graphs/ca-GrQc-p.txt", "\t");
+		FormatGraph("graphs/wiki-Vote.txt","graphs/wiki-Vote-p.txt","\t");
+		FormatGraph("graphs/facebook_combined.txt","graphs/facebook_combined-p.txt"," ");
+	}
+	
+	public static void FormatGraph(String input, String output, String splitter) {
 		try {
 			int previousSrc = -1;
-			BufferedReader br = new BufferedReader(new FileReader("graphs/ca-GrQc.txt"));
-			BufferedWriter bw = new BufferedWriter(new FileWriter("graphs/ca-GrQc-p.txt"));
+			BufferedReader br = new BufferedReader(new FileReader(input));
+			BufferedWriter bw = new BufferedWriter(new FileWriter(output));
 			String line = "";
 			while((line = br.readLine())!=null) {
 				if(!line.trim().startsWith("#")) {
-					String[] split = line.trim().split("\t");
+					String[] split = line.trim().split(splitter);
 					int src = GetIndex(Integer.parseInt(split[0]));
 					int dest = GetIndex(Integer.parseInt(split[1]));
 					if(src==previousSrc)

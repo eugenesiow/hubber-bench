@@ -7,9 +7,14 @@ import java.io.FileWriter;
 
 public class GraphToJson {
 	public static void main(String[] args) {
+//		convertGraphTxtToJson("ca-GrQc-ps");
+		convertGraphTxtToJson("wiki-Vote-ps");
+	}
+	
+	public static void convertGraphTxtToJson(String name) {
 		try {
-			BufferedReader br = new BufferedReader(new FileReader("graphs/ca-GrQc-ps.txt"));
-			BufferedWriter bw = new BufferedWriter(new FileWriter("graphs/ca-GrQc-ps.json"));
+			BufferedReader br = new BufferedReader(new FileReader("graphs/"+name+".txt"));
+			BufferedWriter bw = new BufferedWriter(new FileWriter("graphs/"+name+".json"));
 			bw.append("{\n");
 			String line = "";
 			while((line = br.readLine())!=null) {
