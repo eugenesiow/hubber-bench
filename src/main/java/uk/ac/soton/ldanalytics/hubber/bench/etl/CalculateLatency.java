@@ -11,8 +11,8 @@ import java.util.Map;
 public class CalculateLatency {
 
 	public static void main(String[] args) {
-		String interval = "10s_wiki";
-		String folderPath = "/Users/eugene/Desktop/results_swot_"+interval;
+		String interval = "1s_sub_mqtt";
+		String folderPath = "/Users/eugene/Desktop/results_"+interval;
 		String outputPath = "/Users/eugene/Desktop/results_swot";
 		File folder = new File(folderPath);
 		try {

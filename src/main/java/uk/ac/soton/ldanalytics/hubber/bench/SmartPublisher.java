@@ -65,7 +65,7 @@ public class SmartPublisher {
                         			client.event.emit("test/test"+Integer.parseInt(topushto), new Object[]{"An event just happened", new Date().getTime()});
                         	}
                         }
-                    }, 1, 10000, TimeUnit.MILLISECONDS);
+                    }, 1, 1000, TimeUnit.MILLISECONDS);
                     
                 }
 
