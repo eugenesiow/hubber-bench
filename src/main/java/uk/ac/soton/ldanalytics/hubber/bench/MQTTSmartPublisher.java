@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -24,9 +25,6 @@ public class MQTTSmartPublisher {
     }
 	
 	private static void PublisherApplication(String input) {
-		String broker       = "tcp://localhost:1883";
-        String clientId     = "JavaSample";
-        MemoryPersistence persistence = new MemoryPersistence();
 
         try {
         	final Map<Integer,String[]> subscribers = new HashMap<Integer,String[]>();
@@ -40,46 +38,51 @@ public class MQTTSmartPublisher {
 				}
 			}
             br.close();
-        	
-            final MqttClient sampleClient = new MqttClient(broker, clientId, persistence);
-            MqttConnectOptions connOpts = new MqttConnectOptions();
-            connOpts.setCleanSession(true);
-            System.out.println("Connecting to broker: "+broker);
-            sampleClient.connect(connOpts);
-            System.out.println("Connected");
-            
+
             final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(200);
             executorService.scheduleAtFixedRate(new Runnable() {
                 
                 public void run() {
-                	System.out.println(System.currentTimeMillis());
-//                	int count = 0;
-                	for(Entry<Integer,String[]> subscriber:subscribers.entrySet()) {
-                		for(String topushto:subscriber.getValue()) {
-                			String content      = new Date().getTime() + ",An event just happened";
-                    		MqttMessage message = new MqttMessage(content.getBytes());  
-                    		message.setQos(0);
-                    		try {
-                    			sampleClient.publish("test/test"+Integer.parseInt(topushto), message);
-    						} catch (MqttPersistenceException e) {
-    							e.printStackTrace();
-    						} catch (MqttException e) {
-    							e.printStackTrace();
-    						}
-                		}
-//                		System.out.println(count++);
-                	}
+                	try {
+	                	String broker       = "tcp://localhost:1883";
+	                    String clientId     = "JavaSample" + UUID.randomUUID();
+	                    MemoryPersistence persistence = new MemoryPersistence();
+	                    MqttClient sampleClient = new MqttClient(broker, clientId, persistence);
+	                    MqttConnectOptions connOpts = new MqttConnectOptions();
+	                    connOpts.setCleanSession(true);
+	                    System.out.println("Connecting to broker: "+broker);
+	                    sampleClient.connect(connOpts);
+	                    System.out.println("Connected");
+	                	System.out.println(System.currentTimeMillis());
+//	                	int count = 0;
+	                	for(Entry<Integer,String[]> subscriber:subscribers.entrySet()) {
+	                		for(String topushto:subscriber.getValue()) {
+	                			String content      = new Date().getTime() + ",An event just happened";
+	                    		MqttMessage message = new MqttMessage(content.getBytes());  
+	                    		message.setQos(1);
+	                    		try {
+	                    			sampleClient.publish("test/test"+Integer.parseInt(topushto), message);
+	    						} catch (MqttPersistenceException e) {
+	    							e.printStackTrace();
+	    						} catch (MqttException e) {
+	    							e.printStackTrace();
+	    						}
+	                		}
+//	                		System.out.println(count++);
+	                	}
+	                  sampleClient.disconnect();
+	                } catch(MqttException me) {
+	                    System.out.println("reason "+me.getReasonCode());
+	                    System.out.println("msg "+me.getMessage());
+	                    System.out.println("loc "+me.getLocalizedMessage());
+	                    System.out.println("cause "+me.getCause());
+	                    System.out.println("excep "+me);
+	                    me.printStackTrace();
+	                }
                 }
-            }, 1, 1000, TimeUnit.MILLISECONDS);
+            }, 1, 5000, TimeUnit.MILLISECONDS);
             
-//            sampleClient.disconnect();
-        } catch(MqttException me) {
-            System.out.println("reason "+me.getReasonCode());
-            System.out.println("msg "+me.getMessage());
-            System.out.println("loc "+me.getLocalizedMessage());
-            System.out.println("cause "+me.getCause());
-            System.out.println("excep "+me);
-            me.printStackTrace();
+
         } catch (IOException e1) {
 			e1.printStackTrace();
 		}

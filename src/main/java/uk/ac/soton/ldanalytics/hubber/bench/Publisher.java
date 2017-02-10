@@ -50,11 +50,12 @@ public class Publisher {
                     executorService.scheduleAtFixedRate(new Runnable() {
                         
                         public void run() {
+                        	System.out.println(System.currentTimeMillis());
                         	for(int i=0;i<6000;i++) {
                         		client.event.emit("test/test"+i, new Object[]{"An event just happened", new Date().getTime()});
                         	}
                         }
-                    }, 1, 10000, TimeUnit.MILLISECONDS);
+                    }, 1, 500, TimeUnit.MILLISECONDS);
                     
 //                    client.event.subscribe("test/test1", new EventListener() {
 //                    	public void onEvent(String eventName, Object[] payload) {

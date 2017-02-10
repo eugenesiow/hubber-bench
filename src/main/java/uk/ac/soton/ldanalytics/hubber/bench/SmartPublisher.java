@@ -60,12 +60,13 @@ public class SmartPublisher {
                     executorService.scheduleAtFixedRate(new Runnable() {
                         
                         public void run() {
+                        	System.out.println(System.currentTimeMillis());
                         	for(Entry<Integer,String[]> subscriber:subscribers.entrySet()) {
                         		for(String topushto:subscriber.getValue())
                         			client.event.emit("test/test"+Integer.parseInt(topushto), new Object[]{"An event just happened", new Date().getTime()});
                         	}
                         }
-                    }, 1, 1000, TimeUnit.MILLISECONDS);
+                    }, 1, 500, TimeUnit.MILLISECONDS);
                     
                 }
 

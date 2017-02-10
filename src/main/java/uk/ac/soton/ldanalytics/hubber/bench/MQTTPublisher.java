@@ -55,7 +55,7 @@ public class MQTTPublisher {
 	                    me.printStackTrace();
 	                }
 	            }
-            }, 1, 1000, TimeUnit.MILLISECONDS);
+            }, 1, 500, TimeUnit.MILLISECONDS);
             
 //            sampleClient.disconnect();
         
