@@ -18,7 +18,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 
-public class DisruptorPublisher {
+public class ThreadedPublisher {
 	static String topic        = "MQTT Examples";
     static int qos             = 1;
     static String broker       = "tcp://localhost:1883";
@@ -79,7 +79,7 @@ public class DisruptorPublisher {
         Disruptor<Point> disruptor = new Disruptor<>(Point::new, bufferSize, executor); //TODO: change to threadfactory
 
         // Connect the handler
-        disruptor.handleEventsWith(DisruptorPublisher::handleEvent);
+        disruptor.handleEventsWith(ThreadedPublisher::handleEvent);
 
         // Start the Disruptor, starts all threads running
         disruptor.start();
@@ -91,7 +91,7 @@ public class DisruptorPublisher {
         while (!Thread.currentThread ().isInterrupted ()) {
         	for(int i=0;i<maxmsgs;i++) {
         		String[] msg = {Integer.toString(rand.nextInt(max)),"test"+i};
-        		ringBuffer.publishEvent(DisruptorPublisher::translate, msg);
+        		ringBuffer.publishEvent(ThreadedPublisher::translate, msg);
         	}
         	Thread.sleep(1000);
         }
