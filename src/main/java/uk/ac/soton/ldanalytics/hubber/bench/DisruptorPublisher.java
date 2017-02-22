@@ -26,6 +26,10 @@ public class DisruptorPublisher {
     static MemoryPersistence persistence = new MemoryPersistence();
     static MqttClient sampleClient;
     static Map<Integer,String[]> subscribers;
+    static int count = 0;
+	static int sum = 0;
+	static int max = 5400;
+	static int maxmsgs = 1000;
     
 	
 	public static void handleEvent(Point event, long sequence, boolean endOfBatch) {
@@ -39,7 +43,14 @@ public class DisruptorPublisher {
 					sampleClient.publish(topic, message);
 				}
 				String[] parts = event.getMsg().split(",");
-				System.out.println(System.currentTimeMillis() - Long.parseLong(parts[0]));
+				sum += System.currentTimeMillis() - Long.parseLong(parts[0]);
+    			count++;
+			}
+			if(count>maxmsgs) {
+				double avg = sum*1.0/count;
+				sum = 0;
+				count = 0;
+				System.out.println(avg);
 			}
 		} catch (MqttException e) {
 			e.printStackTrace();
@@ -65,8 +76,6 @@ public class DisruptorPublisher {
         br.close();
 		
 		Random rand = new Random();
-		int max = 5400;
-		int maxmsgs = 5000;
 		String clientId     = UUID.randomUUID().toString();
 		try {
 			sampleClient = new MqttClient(broker, clientId, persistence);
@@ -82,7 +91,7 @@ public class DisruptorPublisher {
         Executor executor = Executors.newCachedThreadPool();
 
         // Specify the size of the ring buffer, must be power of 2.
-        int bufferSize = 1024;
+        int bufferSize = 64;
 
         // Construct the Disruptor
         Disruptor<Point> disruptor = new Disruptor<>(Point::new, bufferSize, executor); //TODO: change to threadfactory
@@ -100,11 +109,11 @@ public class DisruptorPublisher {
         while (!Thread.currentThread ().isInterrupted ()) {
         	for(int i=0;i<maxmsgs;i++) {
 //        		String[] msg = {Integer.toString(rand.nextInt(max)),new Date().getTime()+",An event just happened"+i};
-//        		String[] msg = {Integer.toString(rand.nextInt(max)),System.currentTimeMillis()+",An event just happened"};
-        		String[] msg = {"0",System.currentTimeMillis()+",An event just happened"};
+        		String[] msg = {Integer.toString(rand.nextInt(max)),System.currentTimeMillis()+",An event just happened"};
+//        		String[] msg = {"0",System.currentTimeMillis()+",An event just happened"};
         		ringBuffer.publishEvent(DisruptorPublisher::translate, msg);
         	}
-        	Thread.sleep(5000);
+        	Thread.sleep(1000);
         }
     }
 }

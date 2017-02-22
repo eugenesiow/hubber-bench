@@ -41,7 +41,7 @@ public class ThreadedPublisher {
 		
 		Random rand = new Random();
 		int max = 5400;
-		int maxmsgs = 1000;
+		int maxmsgs = 5000;
 		String clientId     = UUID.randomUUID().toString();
 		try {
 			sampleClient = new MqttClient(broker, clientId, persistence);
@@ -52,14 +52,29 @@ public class ThreadedPublisher {
 			e.printStackTrace();
 		}
 		
+		int count = 0;
+		int sum = 0;
+		
         while (!Thread.currentThread ().isInterrupted()) {
+        	String msg = System.currentTimeMillis() + ","+",An event just happened";
         	for(int i=0;i<maxmsgs;i++) {
         		int pubs = rand.nextInt(max);
-        		String msg = System.currentTimeMillis() + ","+",An event just happened";
-    			MqttMessage message = new MqttMessage(msg.getBytes());
-    			message.setQos(qos);
-    			sampleClient.publish(topic, message);
+        		String[] allPubs = subscribers.get(rand.nextInt(max));
+        		if(allPubs!=null) {
+	        		for(String pub:allPubs) {
+		    			MqttMessage message = new MqttMessage(msg.getBytes());
+		    			message.setQos(qos);
+		    			sampleClient.publish(topic+pub, message);
+		    			String[] parts = msg.split(",");
+		    			sum += System.currentTimeMillis() - Long.parseLong(parts[0]);
+		    			count++;
+	        		}
+        		}
         	}
+        	double avg = sum*1.0/count;
+        	sum = 0;
+        	count = 0;
+    		System.out.println(avg);
         	Thread.sleep(1000);
         }
     }
