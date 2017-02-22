@@ -24,22 +24,6 @@ public class ThreadedPublisher {
     static String broker       = "tcp://localhost:1883";
     static MemoryPersistence persistence = new MemoryPersistence();
     static MqttClient sampleClient;
-    
-	
-	public static void handleEvent(Point event, long sequence, boolean endOfBatch) {
-		try {
-			System.out.println(event.getMsg());
-			MqttMessage message = new MqttMessage(event.getMsg().getBytes());
-			message.setQos(qos);
-			sampleClient.publish(topic, message);
-		} catch (MqttException e) {
-			e.printStackTrace();
-		}
-    }
-
-    public static void translate(Point event, long sequence, String[] msg) {
-    	event.set(Long.parseLong(msg[0]),msg[1]);
-    }
 	
 	public static void main(String[] args) throws Exception {
 		String input = "graphs/ca-GrQc-ps.txt";
@@ -68,30 +52,13 @@ public class ThreadedPublisher {
 			e.printStackTrace();
 		}
 		
-		
-        // Executor that will be used to construct new threads for consumers
-        Executor executor = Executors.newCachedThreadPool();
-
-        // Specify the size of the ring buffer, must be power of 2.
-        int bufferSize = 1024;
-
-        // Construct the Disruptor
-        Disruptor<Point> disruptor = new Disruptor<>(Point::new, bufferSize, executor); //TODO: change to threadfactory
-
-        // Connect the handler
-        disruptor.handleEventsWith(ThreadedPublisher::handleEvent);
-
-        // Start the Disruptor, starts all threads running
-        disruptor.start();
-
-        // Get the ring buffer from the Disruptor to be used for publishing.
-        RingBuffer<Point> ringBuffer = disruptor.getRingBuffer();
-        
-
-        while (!Thread.currentThread ().isInterrupted ()) {
+        while (!Thread.currentThread ().isInterrupted()) {
         	for(int i=0;i<maxmsgs;i++) {
-        		String[] msg = {Integer.toString(rand.nextInt(max)),"test"+i};
-        		ringBuffer.publishEvent(ThreadedPublisher::translate, msg);
+        		int pubs = rand.nextInt(max);
+        		String msg = System.currentTimeMillis() + ","+",An event just happened";
+    			MqttMessage message = new MqttMessage(msg.getBytes());
+    			message.setQos(qos);
+    			sampleClient.publish(topic, message);
         	}
         	Thread.sleep(1000);
         }

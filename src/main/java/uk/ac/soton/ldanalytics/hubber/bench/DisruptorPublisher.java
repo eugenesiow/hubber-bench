@@ -2,6 +2,7 @@ package uk.ac.soton.ldanalytics.hubber.bench;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -19,32 +20,40 @@ import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 
 public class DisruptorPublisher {
-	static String topic        = "MQTT Examples";
+	static String topic        = "test/test";
     static int qos             = 1;
     static String broker       = "tcp://localhost:1883";
     static MemoryPersistence persistence = new MemoryPersistence();
     static MqttClient sampleClient;
+    static Map<Integer,String[]> subscribers;
     
 	
 	public static void handleEvent(Point event, long sequence, boolean endOfBatch) {
 		try {
-			System.out.println(event.getMsg());
 			MqttMessage message = new MqttMessage(event.getMsg().getBytes());
 			message.setQos(qos);
-			sampleClient.publish(topic, message);
+			String[] pubs = subscribers.get(event.getPublisher());
+			if(pubs!=null) {
+//				System.out.println(subscribers.get(1)[1]);
+				for(String pub:pubs) {
+					sampleClient.publish(topic, message);
+				}
+				String[] parts = event.getMsg().split(",");
+				System.out.println(System.currentTimeMillis() - Long.parseLong(parts[0]));
+			}
 		} catch (MqttException e) {
 			e.printStackTrace();
 		}
     }
 
     public static void translate(Point event, long sequence, String[] msg) {
-    	event.set(Long.parseLong(msg[0]),msg[1]);
+    	event.set(Integer.parseInt(msg[0]),msg[1]);
     }
 	
 	public static void main(String[] args) throws Exception {
 		String input = "graphs/ca-GrQc-ps.txt";
-		final Map<Integer,String[]> subscribers = new HashMap<Integer,String[]>();
         
+		subscribers = new HashMap<Integer,String[]>();
         BufferedReader br = new BufferedReader(new FileReader(input));
         String line = "";
 		while((line = br.readLine())!=null) {
@@ -57,7 +66,7 @@ public class DisruptorPublisher {
 		
 		Random rand = new Random();
 		int max = 5400;
-		int maxmsgs = 1000;
+		int maxmsgs = 5000;
 		String clientId     = UUID.randomUUID().toString();
 		try {
 			sampleClient = new MqttClient(broker, clientId, persistence);
@@ -90,10 +99,12 @@ public class DisruptorPublisher {
 
         while (!Thread.currentThread ().isInterrupted ()) {
         	for(int i=0;i<maxmsgs;i++) {
-        		String[] msg = {Integer.toString(rand.nextInt(max)),"test"+i};
+//        		String[] msg = {Integer.toString(rand.nextInt(max)),new Date().getTime()+",An event just happened"+i};
+//        		String[] msg = {Integer.toString(rand.nextInt(max)),System.currentTimeMillis()+",An event just happened"};
+        		String[] msg = {"0",System.currentTimeMillis()+",An event just happened"};
         		ringBuffer.publishEvent(DisruptorPublisher::translate, msg);
         	}
-        	Thread.sleep(1000);
+        	Thread.sleep(5000);
         }
     }
 }
