@@ -29,6 +29,8 @@ public class SingleThreadedPublisher {
 		String input = "graphs/ca-GrQc-ps.txt";
 		final Map<Integer,String[]> subscribers = new HashMap<Integer,String[]>();
         
+		
+		
         BufferedReader br = new BufferedReader(new FileReader(input));
         String line = "";
 		while((line = br.readLine())!=null) {
@@ -55,7 +57,7 @@ public class SingleThreadedPublisher {
 		int count = 0;
 		int sum = 0;
 		
-        while (!Thread.currentThread ().isInterrupted()) {
+        for(int k=0;k<10;k++) {
         	String msg = System.currentTimeMillis() + ","+",An event just happened";
         	for(int i=0;i<maxmsgs;i++) {
         		int pubs = rand.nextInt(max);

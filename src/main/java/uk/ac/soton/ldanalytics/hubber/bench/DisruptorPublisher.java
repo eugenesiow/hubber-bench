@@ -106,7 +106,7 @@ public class DisruptorPublisher {
         RingBuffer<Point> ringBuffer = disruptor.getRingBuffer();
         
 
-        while (!Thread.currentThread ().isInterrupted ()) {
+        for(int k=0;k<10;k++) {
         	for(int i=0;i<maxmsgs;i++) {
 //        		String[] msg = {Integer.toString(rand.nextInt(max)),new Date().getTime()+",An event just happened"+i};
         		String[] msg = {Integer.toString(rand.nextInt(max)),System.currentTimeMillis()+",An event just happened"};
@@ -115,5 +115,6 @@ public class DisruptorPublisher {
         	}
         	Thread.sleep(1000);
         }
+        disruptor.shutdown();
     }
 }
