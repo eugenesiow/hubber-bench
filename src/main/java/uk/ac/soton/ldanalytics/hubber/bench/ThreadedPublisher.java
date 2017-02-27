@@ -24,7 +24,8 @@ public class ThreadedPublisher {
     static MqttClient sampleClient;
 	
 	public static void main(String[] args) throws Exception {
-		String input = "graphs/ca-GrQc-ps.txt";
+//		String input = "graphs/ca-GrQc-ps.txt";
+		String input = "graphs/wiki-Vote-ps.txt";
 		final Map<Integer,String[]> subscribers = new HashMap<Integer,String[]>();
         
         BufferedReader br = new BufferedReader(new FileReader(input));
@@ -38,8 +39,8 @@ public class ThreadedPublisher {
         br.close();
 		
 		Random rand = new Random();
-		int max = 5400;
-		int maxmsgs = 5000;
+		int max = 7100;
+		int maxmsgs = 10000;
 		
 		final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(10);
         executorService.scheduleAtFixedRate(new Runnable() {

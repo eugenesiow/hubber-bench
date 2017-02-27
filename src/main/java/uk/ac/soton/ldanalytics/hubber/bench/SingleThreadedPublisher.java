@@ -26,7 +26,7 @@ public class SingleThreadedPublisher {
     static MqttClient sampleClient;
 	
 	public static void main(String[] args) throws Exception {
-		String input = "graphs/ca-GrQc-ps.txt";
+		String input = "graphs/wiki-Vote-ps.txt";
 		final Map<Integer,String[]> subscribers = new HashMap<Integer,String[]>();
         
 		
@@ -42,8 +42,8 @@ public class SingleThreadedPublisher {
         br.close();
 		
 		Random rand = new Random();
-		int max = 5400;
-		int maxmsgs = 5000;
+		int max = 7100;
+		int maxmsgs = 1000;
 		String clientId     = UUID.randomUUID().toString();
 		try {
 			sampleClient = new MqttClient(broker, clientId, persistence);

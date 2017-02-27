@@ -28,8 +28,9 @@ public class DisruptorPublisher {
     static Map<Integer,String[]> subscribers;
     static int count = 0;
 	static int sum = 0;
-	static int max = 5400;
-	static int maxmsgs = 1000;
+//	static int max = 5400;
+	static int max = 7100;
+	static int maxmsgs = 10000;
     
 	
 	public static void handleEvent(Point event, long sequence, boolean endOfBatch) {
@@ -62,7 +63,8 @@ public class DisruptorPublisher {
     }
 	
 	public static void main(String[] args) throws Exception {
-		String input = "graphs/ca-GrQc-ps.txt";
+//		String input = "graphs/ca-GrQc-ps.txt";
+		String input = "graphs/wiki-Vote-ps.txt";
         
 		subscribers = new HashMap<Integer,String[]>();
         BufferedReader br = new BufferedReader(new FileReader(input));
