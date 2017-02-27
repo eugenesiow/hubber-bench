@@ -7,18 +7,23 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-public class SingleThreadedPublisher {
+public class MultiThreadedPublisher {
 	
 	public static void main(String[] args) throws Exception {
-		String input = "graphs/ca-GrQc-ps.txt";
+		String input = "graphs/wiki-Vote-ps.txt";
 		final Map<Integer,String[]> subscribers = new HashMap<Integer,String[]>();
+		AtomicInteger count = new AtomicInteger(0);
+		AtomicInteger sum = new AtomicInteger(0);
 
         BufferedReader br = new BufferedReader(new FileReader(input));
         String line = "";
@@ -30,27 +35,58 @@ public class SingleThreadedPublisher {
 		}
         br.close();
         
-        int max = 5400;
-    	int maxmsgs = 5000;
+        int max = 7100;
+    	int maxmsgs = 10000;
         
 		Queue<String> queue = new LinkedBlockingQueue<String>();
 		Thread producer = new Thread(new Producer(queue,max,maxmsgs));
-		Thread consumer = new Thread(new SingleConsumer(queue,subscribers,maxmsgs));
 		producer.start();
-		consumer.start();
+		ExecutorService threadPool = Executors.newFixedThreadPool(10);
+		for(int i=0;i<10;i++) {
+			threadPool.execute(new Consumer(queue,subscribers,maxmsgs,count,sum));
+		}
     }
 }
 
-class SingleConsumer implements Runnable {
+class Producer implements Runnable {
 	Queue<String> queue;
-	int count = 0;
-	int sum = 0;
+	Random rand = new Random();
 	int maxmsgs;
+	int max;
+	Producer(Queue<String> queue, int max, int maxmsgs){
+		this.queue = queue;
+		this.maxmsgs = maxmsgs;
+		this.max = max;
+	}
+	public void run() {
+		try {
+			for(int k=0;k<10;k++) {
+	        	String msg = System.currentTimeMillis() +",An event just happened";
+	        	for(int i=0;i<maxmsgs;i++) {
+	        		int pubs = rand.nextInt(max);
+	        		queue.offer(pubs+";"+msg);
+	        	}
+	        	Thread.sleep(1000);
+	        }
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+   }
+}
+
+class Consumer implements Runnable {
+	Queue<String> queue;
+	int maxmsgs;
+	AtomicInteger count;
+	AtomicInteger sum;
 	Map<Integer,String[]> subscribers;
-	SingleConsumer(Queue<String> queue, Map<Integer,String[]> subscribers ,  int maxmsgs){
+	Consumer(Queue<String> queue, Map<Integer,String[]> subscribers ,  int maxmsgs, AtomicInteger count, AtomicInteger sum){
 		this.subscribers = subscribers;
 		this.maxmsgs = maxmsgs;
 		this.queue = queue;
+		this.count = count;
+		this.sum = sum;
 	}
 
 	public void run() {
@@ -78,12 +114,12 @@ class SingleConsumer implements Runnable {
 					}
 				}
 				String[] parts = spl[1].split(",");
-				sum += System.currentTimeMillis() - Long.parseLong(parts[0]);
-				count++;
-				if(count>maxmsgs) {
-					double avg = sum*1.0/count;
-					sum = 0;
-					count = 0;
+				sum.addAndGet((int)(System.currentTimeMillis() - Long.parseLong(parts[0])));
+				count.incrementAndGet();
+				if(count.get()>maxmsgs) {
+					double avg = sum.get()*1.0/count.get();
+					sum.set(0);
+					count.set(0);
 					System.out.println(avg);
 				}
 			}
